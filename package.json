@@ -1,0 +1,9 @@
+{
+  "name": "india-trade-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix macos-app run dev",
+    "build": "npm --prefix macos-app run build",
+    "test": "npm --prefix macos-app run test"
+  }
+}
