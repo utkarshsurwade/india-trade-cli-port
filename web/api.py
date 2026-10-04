@@ -334,6 +334,38 @@ async def _auto_restore_brokers() -> None:
             logging.warning("[startup] Could not restore Upstox: %s", exc)
 
 
+@app.on_event("startup")
+async def _auto_start_telegram_bot() -> None:
+    """Auto-start the Telegram bot if a token is configured."""
+    import logging
+
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    if not token:
+        try:
+            from config.credentials import _kr_get
+
+            token = _kr_get("TELEGRAM_BOT_TOKEN") or ""
+        except Exception:
+            pass
+
+    if not token:
+        logging.debug("[startup] No TELEGRAM_BOT_TOKEN configured — skipping bot")
+        return
+
+    try:
+        from bot.telegram_bot import run_bot_background, validate_token
+
+        ok, info = validate_token(token)
+        if not ok:
+            logging.warning("[startup] Telegram bot token invalid: %s", info)
+            return
+
+        run_bot_background()
+        logging.info("[startup] Telegram bot started: %s", info)
+    except Exception as exc:
+        logging.warning("[startup] Could not start Telegram bot: %s", exc)
+
+
 @app.get("/health", tags=["System"])
 async def health():
     """Health check for the Electron desktop app sidecar."""

@@ -220,6 +220,24 @@ _chat_id: Optional[int] = None
 # Background bot thread — kept here to prevent starting duplicates
 _bot_thread: Optional[threading.Thread] = None
 
+
+# Module-level flag for external imports (e.g. web/skills.py status endpoint).
+# Dynamically checks whether the background thread is alive.
+def _is_bot_running() -> bool:
+    return _bot_thread is not None and _bot_thread.is_alive()
+
+
+# Expose as a simple importable name for backward compat with skills.py
+class _BotRunningDescriptor:
+    """Allows `from bot.telegram_bot import _bot_running` to work as a live check."""
+    def __bool__(self) -> bool:
+        return _is_bot_running()
+    def __repr__(self) -> str:
+        return str(_is_bot_running())
+
+
+_bot_running = _BotRunningDescriptor()
+
 # Thread-local flag: set to True on any thread that should produce no output.
 # Used to silence executor threads spawned by run_in_executor during analysis,
 # which have a different name from "telegram-bot" and would otherwise bypass

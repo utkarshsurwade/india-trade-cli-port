@@ -1324,9 +1324,9 @@ async def skill_telegram_status():
         configured = bool(token)
         running = False
         try:
-            from bot.telegram_bot import _bot_running
+            from bot.telegram_bot import _is_bot_running
 
-            running = _bot_running
+            running = _is_bot_running()
         except Exception:
             pass
         return {
